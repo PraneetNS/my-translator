@@ -1,9 +1,11 @@
 import { useState, useCallback } from 'react'
+import useHistory from './useHistory'
 
 export default function useTranslation() {
   const [translatedText, setTranslatedText] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
+  const { addEntry } = useHistory()
 
   const translate = useCallback(async (text, targetLang) => {
     if (!text.trim()) return
@@ -29,13 +31,18 @@ export default function useTranslation() {
 
       console.log('Google Translate result:', translation)
       setTranslatedText(translation)
+      
+      // Save to history
+      addEntry({ original: text, translated: translation, targetLang })
+      
+      return translation
     } catch (err) {
       console.error('Translation error:', err)
       setError(`Translation failed: ${err.message}`)
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [addEntry])
 
   return { translatedText, loading, error, translate }
 }

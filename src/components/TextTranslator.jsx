@@ -1,16 +1,25 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import useTranslation from '../hooks/useTranslation'
 import useTTS from '../hooks/useTTS'
 import LanguageSelector from './LanguageSelector'
 import { LANGUAGES } from '../utils/languages'
+import usePhrasebook from '../hooks/usePhrasebook'
 
 export default function TextTranslator() {
   const [inputText, setInputText] = useState('')
   const [targetLang, setTargetLang] = useState('ES')
+  const [autoSpeak, setAutoSpeak] = useState(false)
   const { translatedText, loading, error, translate } = useTranslation()
   const { speak, stop } = useTTS()
+  const { togglePhrase, isStarred } = usePhrasebook()
 
-  const handleTranslate = () => translate(inputText, targetLang)
+  const handleTranslate = async () => {
+    const result = await translate(inputText, targetLang)
+    if (result && autoSpeak) {
+      const lang = LANGUAGES.find(l => l.code === targetLang)
+      speak(result, lang.ttsLang)
+    }
+  }
 
   const handleSpeak = () => {
     const lang = LANGUAGES.find(l => l.code === targetLang)
@@ -24,15 +33,26 @@ export default function TextTranslator() {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
 
-      {/* Language selector */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-        <span style={{ fontSize: 13, color: '#888' }}>Auto-detect</span>
-        <span style={{ color: '#ccc' }}>→</span>
-        <LanguageSelector
-          value={targetLang}
-          onChange={setTargetLang}
-          label="Translate to"
-        />
+      {/* Controls */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+          <span style={{ fontSize: 13, color: '#888' }}>Auto-detect</span>
+          <span style={{ color: '#ccc' }}>→</span>
+          <LanguageSelector
+            value={targetLang}
+            onChange={setTargetLang}
+            label="Translate to"
+          />
+        </div>
+        
+        <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer', fontSize: 13, color: '#666' }}>
+          <input 
+            type="checkbox" 
+            checked={autoSpeak} 
+            onChange={e => setAutoSpeak(e.target.checked)}
+          />
+          Auto-speak
+        </label>
       </div>
 
       {/* Input box */}
@@ -86,9 +106,18 @@ export default function TextTranslator() {
           borderRadius: 10,
           padding: '14px 16px',
         }}>
-          <p style={{ fontSize: 15, lineHeight: 1.7, marginBottom: 12 }}>
-            {translatedText}
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+            <p style={{ fontSize: 15, lineHeight: 1.7, flex: 1 }}>
+              {translatedText}
+            </p>
+            <button 
+              onClick={() => togglePhrase({ original: inputText, translated: translatedText, targetLang })}
+              style={{ border: 'none', background: 'none', cursor: 'pointer', fontSize: 18 }}
+            >
+              {isStarred(inputText, targetLang) ? '⭐' : '☆'}
+            </button>
+          </div>
+          
           <div style={{ display: 'flex', gap: 8 }}>
             <button
               onClick={handleSpeak}
