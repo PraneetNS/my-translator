@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useConversationStore } from '../../store/conversationStore'
-import { translateText } from '../../services/bhashini'
+import { translateText } from '../../services/sarvam'
 
 const BASE_PHRASES = [
   'Hello', 'Thank you', 'How much?',
@@ -9,13 +9,12 @@ const BASE_PHRASES = [
 ]
 
 export default function QuickPhrases() {
-  const { speakerB, pipelineConfig } = useConversationStore()
+  const { speakerB } = useConversationStore()
   const [translated, setTranslated] = useState({})
   const [loading, setLoading] = useState({})
 
   const handlePhrase = async (phrase) => {
     if (translated[phrase]) return // already translated; just show it
-    if (!pipelineConfig) return
 
     setLoading(prev => ({ ...prev, [phrase]: true }))
     try {
@@ -23,7 +22,6 @@ export default function QuickPhrases() {
         text: phrase,
         sourceLang: 'en',
         targetLang: speakerB.code,
-        serviceId: pipelineConfig?.pipelineResponseConfig?.[1]?.config?.[0]?.serviceId,
       })
       setTranslated(prev => ({ ...prev, [phrase]: result }))
     } catch (e) {

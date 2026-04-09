@@ -14,7 +14,7 @@ export function startRecording() {
       }
 
       mediaRecorder.onstop = async () => {
-        const blob = new Blob(audioChunks, { type: 'audio/wav' })
+        const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' })
         const buffer = await blob.arrayBuffer()
         // Safe base64 for large buffers
         const bytes = new Uint8Array(buffer)

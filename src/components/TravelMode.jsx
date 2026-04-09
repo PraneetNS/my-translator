@@ -1,10 +1,10 @@
 import { useState } from 'react'
 import { useConversationStore } from '../store/conversationStore'
-import { runPipeline } from '../services/bhashini'
+import { runPipeline } from '../services/sarvam'
 import { startRecording, stopRecording } from '../utils/recorder'
 
 export default function TravelMode({ onExit }) {
-  const { speakerA, speakerB, pipelineConfig } = useConversationStore()
+  const { speakerA, speakerB } = useConversationStore()
   const [result, setResult] = useState(null)
   const [recording, setRecording] = useState(false)
   const [loading, setLoading] = useState(false)
@@ -33,13 +33,12 @@ export default function TravelMode({ onExit }) {
         audioBase64,
         sourceLang: speakerA.code,
         targetLang: speakerB.code,
-        pipelineConfig,
       })
       setResult(res)
       const audio = new Audio(`data:audio/wav;base64,${res.audioBase64}`)
       audio.play()
     } catch (e) {
-      setError('Translation failed. Check Bhashini API keys.')
+      setError('Translation failed. Check Sarvam AI API keys.')
     }
     setLoading(false)
   }

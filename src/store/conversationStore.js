@@ -4,7 +4,6 @@ export const useConversationStore = create((set, get) => ({
   messages: [],
   speakerA: { code: 'hi', label: 'Hindi', script: 'हिन्दी', ttsLang: 'hi-IN' },
   speakerB: { code: 'ta', label: 'Tamil', script: 'தமிழ்', ttsLang: 'ta-IN' },
-  pipelineConfig: null,
   isTravelMode: false,
 
   setSpeaker: (side, lang) => set(() => ({
@@ -18,8 +17,6 @@ export const useConversationStore = create((set, get) => ({
   clearMessages: () => set({ messages: [] }),
 
   toggleTravelMode: () => set(state => ({ isTravelMode: !state.isTravelMode })),
-
-  setPipelineConfig: (config) => set({ pipelineConfig: config }),
 
   exportConversation: () => {
     const { messages, speakerA, speakerB } = get()

@@ -1,5 +1,5 @@
 /**
- * SetupScreen — shown when Bhashini API keys are missing.
+ * SetupScreen — shown when Sarvam AI API keys are missing.
  * Guides user to register and add keys to their .env file.
  */
 export default function SetupScreen() {
@@ -33,15 +33,15 @@ export default function SetupScreen() {
         textAlign: 'left',
       }}>
         <h2 style={{ fontSize: 15, fontWeight: 600, marginBottom: 16, color: '#333' }}>
-          🔑 Bhashini API Keys Required
+          🔑 Sarvam AI API Key Required
         </h2>
 
         <ol style={{ fontSize: 13, color: '#555', lineHeight: 2, paddingLeft: 18, margin: 0 }}>
-          <li>Visit <strong>bhashini.gov.in/ulca</strong> and register (free)</li>
+          <li>Visit <strong>dashboard.sarvam.ai</strong> and register</li>
           <li>Go to Dashboard → API Keys</li>
-          <li>Copy your <strong>User ID</strong> and <strong>ULCA API Key</strong></li>
+          <li>Copy your <strong>API Key</strong></li>
           <li>Open <code style={{ background: '#f5f5f5', padding: '1px 6px', borderRadius: 4 }}>.env</code> in the project root</li>
-          <li>Paste the values:</li>
+          <li>Paste the value:</li>
         </ol>
 
         <pre style={{
@@ -54,8 +54,7 @@ export default function SetupScreen() {
           overflowX: 'auto',
           lineHeight: 1.8,
         }}>
-{`VITE_BHASHINI_USER_ID=your_user_id
-VITE_BHASHINI_API_KEY=your_ulca_api_key`}
+{`VITE_SARVAM_API_KEY=your_sarvam_api_key_here`}
         </pre>
 
         <p style={{ fontSize: 12, color: '#aaa', marginTop: 14 }}>
@@ -64,8 +63,8 @@ VITE_BHASHINI_API_KEY=your_ulca_api_key`}
       </div>
 
       <p style={{ fontSize: 12, color: '#bbb', maxWidth: 360 }}>
-        Bhashini is a Government of India initiative — free to use, no billing.
-        Supports all 22 scheduled languages for STT, translation, and TTS.
+        Sarvam AI provides state-of-the-art models for Indic languages.
+        Supports 10+ major Indian languages for STT, translation, and TTS.
       </p>
     </div>
   )

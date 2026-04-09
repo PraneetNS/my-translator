@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useConversationStore } from '../../store/conversationStore'
-import { getPipelineConfig, runPipeline } from '../../services/bhashini'
+import { runPipeline } from '../../services/sarvam'
 import { startRecording, stopRecording } from '../../utils/recorder'
 import BubbleList from './BubbleList'
 import SpeakerPanel from './SpeakerPanel'
@@ -9,8 +9,8 @@ import TravelMode from '../TravelMode'
 
 export default function ConversationView() {
   const {
-    speakerA, speakerB, messages, pipelineConfig,
-    addMessage, setPipelineConfig,
+    speakerA, speakerB, messages,
+    addMessage,
     toggleTravelMode, isTravelMode,
     exportConversation, clearMessages,
   } = useConversationStore()
@@ -21,26 +21,7 @@ export default function ConversationView() {
   const [initStatus, setInitStatus] = useState('idle') // 'idle' | 'loading' | 'done' | 'error'
   const bottomRef = useRef(null)
 
-  // Initialise Bhashini pipeline whenever speakers change
-  useEffect(() => {
-    let cancelled = false
-    async function initPipeline() {
-      setInitStatus('loading')
-      setError(null)
-      try {
-        const config = await getPipelineConfig(speakerA.code, speakerB.code)
-        if (cancelled) return
-        setPipelineConfig(config)
-        setInitStatus('done')
-      } catch (e) {
-        if (cancelled) return
-        setError('Could not connect to Bhashini. Add your API keys to .env')
-        setInitStatus('error')
-      }
-    }
-    initPipeline()
-    return () => { cancelled = true }
-  }, [speakerA.code, speakerB.code])
+  // Sarvam AI does not require pre-fetching pipeline config, we can start right away.
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
@@ -70,7 +51,7 @@ export default function ConversationView() {
       const sourceLang = side === 'A' ? speakerA.code : speakerB.code
       const targetLang = side === 'A' ? speakerB.code : speakerA.code
 
-      const result = await runPipeline({ audioBase64, sourceLang, targetLang, pipelineConfig })
+      const result = await runPipeline({ audioBase64, sourceLang, targetLang })
 
       // Play translated audio
       const audio = new Audio(`data:audio/wav;base64,${result.audioBase64}`)
@@ -100,16 +81,11 @@ export default function ConversationView() {
         <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
           <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111', margin: 0 }}>वाणी</h1>
           <span style={{ fontSize: 13, color: '#aaa', fontWeight: 400 }}>Vaani</span>
-          {initStatus === 'loading' && (
-            <span style={{ fontSize: 11, color: '#888', background: '#f0f0f0', padding: '2px 8px', borderRadius: 12 }}>
-              Connecting…
-            </span>
-          )}
-          {initStatus === 'done' && (
+          {initStatus === 'done' || initStatus === 'idle' ? (
             <span style={{ fontSize: 11, color: '#1D9E75', background: '#E1F5EE', padding: '2px 8px', borderRadius: 12 }}>
               Ready
             </span>
-          )}
+          ) : null}
         </div>
 
         <div style={{ display: 'flex', gap: 8 }}>
