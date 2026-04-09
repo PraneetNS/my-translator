@@ -38,7 +38,7 @@ export default function TravelMode({ onExit }) {
       const audio = new Audio(`data:audio/wav;base64,${res.audioBase64}`)
       audio.play()
     } catch (e) {
-      setError('Translation failed. Check Sarvam AI API keys.')
+      setError(e.message || 'Translation failed.')
     }
     setLoading(false)
   }
