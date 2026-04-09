@@ -1,67 +1,82 @@
 import { useState } from 'react'
+import { PHRASE_PACKS } from '../../data/phrases'
 import { useConversationStore } from '../../store/conversationStore'
-import { translateText } from '../../services/sarvam'
-
-const BASE_PHRASES = [
-  'Hello', 'Thank you', 'How much?',
-  'Where is...?', 'Please help', "I don't understand",
-  'Repeat please', 'Yes', 'No',
-]
 
 export default function QuickPhrases() {
   const { speakerB } = useConversationStore()
-  const [translated, setTranslated] = useState({})
-  const [loading, setLoading] = useState({})
+  const [activePack, setActivePack] = useState('travel')
+  const [spoken, setSpoken] = useState(null)
 
-  const handlePhrase = async (phrase) => {
-    if (translated[phrase]) return // already translated; just show it
+  const pack = PHRASE_PACKS.find(p => p.id === activePack)
 
-    setLoading(prev => ({ ...prev, [phrase]: true }))
-    try {
-      const result = await translateText({
-        text: phrase,
-        sourceLang: 'en',
-        targetLang: speakerB.code,
-      })
-      setTranslated(prev => ({ ...prev, [phrase]: result }))
-    } catch (e) {
-      console.warn('Quick phrase translation failed:', e)
-    } finally {
-      setLoading(prev => ({ ...prev, [phrase]: false }))
+  const handlePhrase = (phrase) => {
+    setSpoken(phrase.en)
+
+    // Use offline text from JSON first (no API needed)
+    const text = phrase[speakerB.code] || phrase['hi'] || phrase.en
+
+    // Speak using Web Speech API as offline fallback
+    if (window.speechSynthesis) {
+      window.speechSynthesis.cancel()
+      const utter = new SpeechSynthesisUtterance(text)
+      utter.lang = speakerB.ttsLang || 'hi-IN'
+      window.speechSynthesis.speak(utter)
     }
+
+    setTimeout(() => setSpoken(null), 2000)
   }
 
   return (
-    <div style={{
-      padding: '10px 16px',
-      borderBottom: '0.5px solid #eee',
-      display: 'flex',
-      gap: 8,
-      overflowX: 'auto',
-      background: 'white',
-    }}>
-      {BASE_PHRASES.map(phrase => (
-        <button
-          key={phrase}
-          onClick={() => handlePhrase(phrase)}
-          style={{
-            flexShrink: 0,
-            padding: '6px 14px',
-            borderRadius: 20,
-            border: '0.5px solid',
-            borderColor: translated[phrase] ? '#378ADD' : '#ddd',
-            background: translated[phrase] ? '#E6F1FB' : 'white',
-            fontSize: 12,
-            cursor: 'pointer',
-            whiteSpace: 'nowrap',
-            color: translated[phrase] ? '#0C447C' : '#333',
-            opacity: loading[phrase] ? 0.5 : 1,
-          }}
-          title={translated[phrase] ? `${phrase} → ${translated[phrase]}` : `Translate "${phrase}"`}
-        >
-          {loading[phrase] ? '…' : translated[phrase] ? translated[phrase] : phrase}
-        </button>
-      ))}
+    <div style={{ background: 'white', borderBottom: '0.5px solid #eee' }}>
+
+      {/* Pack tabs */}
+      <div style={{ display: 'flex', overflowX: 'auto', padding: '8px 12px 0',
+        gap: 6, borderBottom: '0.5px solid #f0f0f0' }}>
+        {PHRASE_PACKS.map(pack => (
+          <button
+            key={pack.id}
+            onClick={() => setActivePack(pack.id)}
+            style={{
+              flexShrink: 0, padding: '5px 12px', borderRadius: 20,
+              border: '0.5px solid',
+              borderColor: activePack === pack.id ? pack.color : '#eee',
+              background: activePack === pack.id ? pack.color : 'transparent',
+              color: activePack === pack.id ? pack.text : '#888',
+              fontSize: 11, fontWeight: 500, cursor: 'pointer',
+              whiteSpace: 'nowrap', marginBottom: 8,
+            }}>
+            {pack.icon} {pack.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Phrases */}
+      <div style={{ display: 'flex', gap: 8, overflowX: 'auto',
+        padding: '10px 12px', alignItems: 'center' }}>
+        <span style={{ fontSize: 10, color: '#bbb', flexShrink: 0,
+          textTransform: 'uppercase', letterSpacing: '0.05em' }}>offline</span>
+        {pack.phrases.map((phrase, i) => {
+          const translated = phrase[speakerB.code] || phrase['hi']
+          const isActive = spoken === phrase.en
+          return (
+            <button
+              key={i}
+              onClick={() => handlePhrase(phrase)}
+              style={{
+                flexShrink: 0, padding: '7px 14px', borderRadius: 20,
+                border: '0.5px solid',
+                borderColor: isActive ? pack.text : '#e0e0e0',
+                background: isActive ? pack.color : 'white',
+                color: isActive ? pack.text : '#333',
+                fontSize: 12, cursor: 'pointer',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.15s',
+              }}>
+              {translated || phrase.en}
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

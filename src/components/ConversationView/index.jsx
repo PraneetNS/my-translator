@@ -6,6 +6,7 @@ import BubbleList from './BubbleList'
 import SpeakerPanel from './SpeakerPanel'
 import QuickPhrases from './QuickPhrases'
 import TravelMode from '../TravelMode'
+import SummaryPanel from '../SummaryPanel'
 
 export default function ConversationView() {
   const {
@@ -95,6 +96,7 @@ export default function ConversationView() {
           <button onClick={toggleTravelMode} style={pillBtn('#f0f0f0', '#333')}>
             ✈ Travel
           </button>
+          <SummaryPanel />
           <button
             onClick={exportConversation}
             disabled={!messages.length}
