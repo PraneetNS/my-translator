@@ -4,6 +4,9 @@ import food from './food.json'
 import transport from './transport.json'
 import shopping from './shopping.json'
 import emergency from './emergency.json'
+import festivals from './festivals.json'
+import wedding from './wedding.json'
+import business from './business.json'
 
 export const PHRASE_PACKS = [
   { id: 'travel',    label: 'Travel',     icon: '✈',  color: '#E6F1FB', text: '#0C447C', phrases: travel },
@@ -12,4 +15,7 @@ export const PHRASE_PACKS = [
   { id: 'transport', label: 'Transport',  icon: '🚌', color: '#EAF3DE', text: '#27500A', phrases: transport },
   { id: 'shopping',  label: 'Shopping',   icon: '🛍',  color: '#EEEDFE', text: '#3C3489', phrases: shopping },
   { id: 'emergency', label: 'Emergency',  icon: '🚨', color: '#FCEBEB', text: '#A32D2D', phrases: emergency },
+  { id: 'festivals', label: 'Festivals',  icon: '🪔', color: '#FAEEDA', text: '#633806', phrases: festivals },
+  { id: 'wedding',   label: 'Wedding',    icon: '💍', color: '#FBEAF0', text: '#72243E', phrases: wedding },
+  { id: 'business',  label: 'Business',   icon: '🤝', color: '#EAF3DE', text: '#27500A', phrases: business },
 ]

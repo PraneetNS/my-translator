@@ -6,6 +6,24 @@ const getHeaders = () => ({
   'api-subscription-key': import.meta.env.VITE_SARVAM_API_KEY,
 })
 
+export function buildFormalityContext(formality, dialect) {
+  const formalityMap = {
+    very_formal: 'Use very respectful honorifics. In Hindi use aap and ji. In Tamil use neenga. In Telugu use meeru.',
+    formal: 'Use polite formal language. In Hindi use aap. In Tamil use neenga.',
+    informal: 'Use casual friendly language. In Hindi use tum. In Tamil use nee.',
+  }
+  const dialectMap = {
+    mumbai: 'Use Mumbai-style Hindi with some Marathi influence where natural.',
+    delhi: 'Use Delhi-style Hindi, direct and colloquial.',
+    bengaluru: 'Use Bengaluru-style Kannada-influenced Hindi or direct Kannada.',
+    hyderabad: 'Use Hyderabadi style with Dakhani/Urdu influence where natural.',
+    kolkata: 'Use Kolkata-style Bengali-influenced speech.',
+    chennai: 'Use Chennai-style Tamil.',
+    standard: '',
+  }
+  return [formalityMap[formality], dialectMap[dialect]].filter(Boolean).join(' ')
+}
+
 // Full pipeline: audio → transcribed text → translated text → audio
 export async function runPipeline({ audioBase64, sourceLang, targetLang }) {
   // 1. Convert base64 to Blob for STT
@@ -87,17 +105,20 @@ export async function runPipeline({ audioBase64, sourceLang, targetLang }) {
   }
 }
 
-// Text-only translation (for quick phrases)
-export async function translateText({ text, sourceLang, targetLang }) {
+// Text-only translation (for quick phrases and text input mode)
+export async function translateText({ text, sourceLang, targetLang, formality = 'formal', dialect = 'standard' }) {
+  const promptContext = buildFormalityContext(formality, dialect)
+  const inputPayload = promptContext ? `[Context: ${promptContext}]\n${text}` : text
+
   const translateRes = await fetch(SARVAM_TRANSLATE, {
     method: 'POST',
     headers: { ...getHeaders(), 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      input: text,
+      input: inputPayload,
       source_language_code: sourceLang === 'en' ? 'en-IN' : sourceLang + '-IN',
       target_language_code: targetLang + '-IN',
       speaker_gender: 'Female',
-      mode: 'formal',
+      mode: formality.includes('informal') ? 'informal' : 'formal',
       model: 'mayura:v1'
     })
   })

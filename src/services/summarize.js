@@ -12,28 +12,30 @@ export async function summarizeConversation(messages, speakerA, speakerB) {
       'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'llama3-70b-8192',
-      messages: [{
-        role: 'user',
-        content: `You are summarizing a multilingual conversation between two people using a translation app.
+      model: 'mixtral-8x7b-32768',
+      max_tokens: 1000,
+      messages: [
+        {
+          role: 'system',
+          content: `You are summarizing multilingual conversations for an Indian language translation app called Vaani. 
+Be concise, culturally aware, and practical. Always respond in English.`
+        },
+        {
+          role: 'user',
+          content: `Summarize this conversation between ${speakerA.label} and ${speakerB.label} speakers:
 
-Here is the conversation transcript (format: Speaker: original → translated):
 ${transcript}
 
-Please provide:
+Provide:
 1. A 2-3 sentence summary of what was discussed
-2. Key topics covered (as a short bullet list, max 4 items)
-3. Any unresolved questions or action items if present
+2. Key topics (max 4 bullet points)  
+3. Any action items or unresolved questions
 
-Keep it concise and practical. Respond in English.`
-      }]
+Keep it short and practical.`
+        }
+      ]
     })
   })
-
-  if (!res.ok) {
-     const errorBody = await res.json().catch(() => ({}));
-     throw new Error(`Groq API Error: ${errorBody?.error?.message || res.statusText}`);
-  }
 
   const data = await res.json()
   return data.choices[0].message.content
