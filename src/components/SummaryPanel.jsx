@@ -18,7 +18,7 @@ export default function SummaryPanel() {
       setOpen(true)
     } catch (e) {
       setSummary(null)
-      setErrorMsg(e.message || 'Failed to generate summary. Check your Anthropic API key.')
+      setErrorMsg(e.message || 'Failed to generate summary. Check your Groq API key.')
       setOpen(true)
     }
     setLoading(false)

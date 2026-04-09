@@ -5,17 +5,14 @@ export async function summarizeConversation(messages, speakerA, speakerB) {
     `${m.side === 'A' ? speakerA.label : speakerB.label}: ${m.transcript} → ${m.translatedText}`
   ).join('\n')
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch('https://api.groq.com/openai/v1/chat/completions', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      'x-api-key': import.meta.env.VITE_ANTHROPIC_API_KEY,
-      'anthropic-version': '2023-06-01',
-      'anthropic-dangerous-direct-browser-access': 'true',
+      'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`,
     },
     body: JSON.stringify({
-      model: 'claude-3-5-sonnet-20241022',
-      max_tokens: 1000,
+      model: 'llama3-70b-8192',
       messages: [{
         role: 'user',
         content: `You are summarizing a multilingual conversation between two people using a translation app.
@@ -35,9 +32,9 @@ Keep it concise and practical. Respond in English.`
 
   if (!res.ok) {
      const errorBody = await res.json().catch(() => ({}));
-     throw new Error(`Anthropic API Error: ${errorBody?.error?.message || res.statusText}`);
+     throw new Error(`Groq API Error: ${errorBody?.error?.message || res.statusText}`);
   }
 
   const data = await res.json()
-  return data.content[0].text
+  return data.choices[0].message.content
 }
